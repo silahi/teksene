@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test EmailJS - Teksene</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #f5f7fa;
+    }
+    .test-container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .btn {
+      background: #0057B7;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    .btn:hover {
+      background: #003e8a;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+    .success {
+      background: #e8f5e8;
+      color: #2e7d32;
+      border: 1px solid #4caf50;
+    }
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #f44336;
+    }
+    .config-form {
+      background: #f5f7fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .config-form input {
+      width: 100%;
+      padding: 8px 12px;
+      margin: 5px 0 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>🧪 Test EmailJS - Teksene</h1>
+    <p>Utilisez cette page pour tester votre configuration EmailJS avant de l'intégrer au site principal.</p>
+    
+    <div class="config-form">
+      <h3>Configuration EmailJS</h3>
+      <label>Service ID :</label>
+      <input type="text" id="serviceId" placeholder="service_abc123">
+      
+      <label>Template ID :</label>
+      <input type="text" id="templateId" placeholder="template_xyz789">
+      
+      <label>Public Key :</label>
+      <input type="text" id="publicKey" placeholder="pk_123456789">
+    </div>
+    
+    <button class="btn" onclick="testBasicEmail()">📧 Test Email Simple</button>
+    <button class="btn" onclick="testFullTemplate()">📋 Test Template Complet</button>
+    <button class="btn" onclick="copyConfig()">📋 Copier Config</button>
+    
+    <div id="result" class="result"></div>
+  </div>
+
+  <!-- EmailJS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  
+  <script>
+    function showResult(message, isSuccess) {
+      const result = document.getElementById('result');
+      result.className = `result ${isSuccess ? 'success' : 'error'}`;
+      result.style.display = 'block';
+      result.innerHTML = message;
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        result.style.display = 'none';
+      }, 5000);
+    }
+
+    function getConfig() {
+      return {
+        serviceId: document.getElementById('serviceId').value.trim(),
+        templateId: document.getElementById('templateId').value.trim(),
+        publicKey: document.getElementById('publicKey').value.trim()
+      };
+    }
+
+    function validateConfig(config) {
+      if (!config.serviceId || !config.templateId || !config.publicKey) {
+        showResult('❌ Veuillez remplir tous les champs de configuration', false);
+        return false;
+      }
+      return true;
+    }
+
+    async function testBasicEmail() {
+      const config = getConfig();
+      if (!validateConfig(config)) return;
+
+      try {
+        // Initialiser EmailJS
+        emailjs.init(config.publicKey);
+        
+        // Test avec données simples
+        const response = await emailjs.send(config.serviceId, config.templateId, {
+          to_email: 'silahi.alihoussene@gmail.com',
+          from_name: 'Test EmailJS',
+          from_email: 'test@teksene.com',
+          entreprise: 'Test Company',
+          whatsapp: '+33123456789',
+          besoins: 'Test de configuration',
+          autre_besoin: 'Aucun',
+          contexte: 'Ceci est un test de la configuration EmailJS pour Teksene.',
+          maturite: 'Test',
+          diagnostic: 'Oui',
+          disponibilites: 'Immédiatement',
+          date_soumission: new Date().toLocaleString('fr-FR')
+        });
+
+        showResult(`✅ Email envoyé avec succès !<br>Status: ${response.status}<br>Response: ${response.text}`, true);
+        
+      } catch (error) {
+        showResult(`❌ Erreur: ${error.message || error.text || 'Erreur inconnue'}`, false);
+        console.error('Erreur EmailJS:', error);
+      }
+    }
+
+    async function testFullTemplate() {
+      const config = getConfig();
+      if (!validateConfig(config)) return;
+
+      try {
+        emailjs.init(config.publicKey);
+        
+        // Test avec données complètes comme le vrai formulaire
+        const response = await emailjs.send(config.serviceId, config.templateId, {
+          to_email: 'silahi.alihoussene@gmail.com',
+          from_name: 'Jean Dupont',
+          from_email: 'jean.dupont@exemple.com',
+          entreprise: 'Exemple SARL',
+          whatsapp: '+33612345678',
+          besoins: 'Audit et collecte de données, Création de dashboards',
+          autre_besoin: 'Formation avancée en IA',
+          contexte: 'Notre entreprise génère beaucoup de données de vente mais nous avons du mal à les exploiter efficacement. Nous aimerions créer des tableaux de bord pour suivre nos KPIs et former nos équipes à l\'analyse de données.',
+          maturite: 'Je collecte des données mais sans les structurer',
+          diagnostic: 'Oui, je suis intéressé(e)',
+          disponibilites: 'Cette semaine entre 14h et 17h, ou la semaine prochaine en matinée',
+          date_soumission: new Date().toLocaleString('fr-FR')
+        });
+
+        showResult(`✅ Template complet envoyé !<br>Status: ${response.status}<br>Vérifiez votre boîte mail 📧`, true);
+        
+      } catch (error) {
+        showResult(`❌ Erreur: ${error.message || error.text || 'Erreur inconnue'}`, false);
+        console.error('Erreur EmailJS:', error);
+      }
+    }
+
+    function copyConfig() {
+      const config = getConfig();
+      if (!validateConfig(config)) return;
+
+      const configCode = `// Configuration EmailJS pour js/database.js
+const EMAIL_CONFIG = {
+  serviceId: '${config.serviceId}',
+  templateId: '${config.templateId}',
+  publicKey: '${config.publicKey}'
+};`;
+
+      navigator.clipboard.writeText(configCode).then(() => {
+        showResult('📋 Configuration copiée dans le presse-papier !<br>Collez-la dans js/database.js', true);
+      }).catch(() => {
+        showResult(`📋 Configuration à copier :<br><code>${configCode}</code>`, true);
+      });
+    }
+
+    // Pré-remplir avec des exemples
+    window.onload = function() {
+      document.getElementById('serviceId').placeholder = 'Ex: service_abc123';
+      document.getElementById('templateId').placeholder = 'Ex: template_xyz789';
+      document.getElementById('publicKey').placeholder = 'Ex: pk_123456789';
+    };
+  </script>
+</body>
+</html>

@@ -8,9 +8,9 @@ const DB_CONFIG = {
 
 // Configuration EmailJS (à configurer avec vos clés)
 const EMAIL_CONFIG = {
-  serviceId: 'service_teksene', // À remplacer par votre service ID
-  templateId: 'template_contact_notification', // À remplacer par votre template ID  
-  publicKey: 'YOUR_EMAILJS_PUBLIC_KEY' // À remplacer par votre clé publique
+  serviceId: 'service_mzhk0j5', // À remplacer par votre service ID
+  templateId: 'template_619y3pp', // À remplacer par votre template ID
+  publicKey: 'orF_et9Zl5ZS43tma' // À remplacer par votre clé publique
 };
 
 // Fonction pour insérer les données via Netlify Function

@@ -173,10 +173,11 @@ document.addEventListener('DOMContentLoaded', function () {
               showToast('Partiellement envoyé', 'Votre demande a été enregistrée mais l\'email de notification a échoué. Nous vous contacterons quand même.', 'warning');
             } else if (!results.database && results.email) {
               // Base KO, email OK
-              showToast('Partiellement envoyé', 'L\'email a été envoyé mais l\'enregistrement en base a échoué. Nous avons reçu votre demande.', 'warning');
+              //showToast('Partiellement envoyé', 'L\'email a été envoyé mais l\'enregistrement en base a échoué. Nous avons reçu votre demande.', 'warning');
+              showToast('Succès', 'Votre demande a été envoyée avec succès ! Nous vous contacterons dans les plus brefs délais.', 'success');
             } else {
               // Échec complet
-              showToast('Erreur', 'Une erreur est survenue. Veuillez réessayer ou nous contacter directement.', 'error');
+              showToast('Erreur', 'Une erreur est survenue. Veuillez réessayer ou nous contacter directement au +221 78 158 56 46.', 'error');
             }
             
             // Reset du formulaire en cas de succès partiel ou total

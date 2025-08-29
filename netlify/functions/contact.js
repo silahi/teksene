@@ -84,7 +84,7 @@ exports.handler = async (event, context) => {
 
     // Préparer la requête SQL
     const query = `
-      INSERT INTO prises_contact (
+      INSERT INTO public.prises_contact (
         id, nom_complet, entreprise, email, whatsapp,
         besoin_principal, autre_besoin, contexte_projet,
         maturite_data, diagnostic_gratuit, disponibilite_contact,

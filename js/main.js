@@ -93,42 +93,120 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Gestion du formulaire de contact
   const contactForm = document.getElementById('contactForm');
-  const formMessage = document.getElementById('formMessage');
   if (contactForm) {
+    // Gestion de l'affichage du champ "Autre besoin"
+    const autreCheckbox = document.getElementById('autreCheckbox');
+    const autreBesoinGroup = document.getElementById('autreBesoinGroup');
+    
+    if (autreCheckbox && autreBesoinGroup) {
+      autreCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          autreBesoinGroup.style.display = 'block';
+        } else {
+          autreBesoinGroup.style.display = 'none';
+          document.getElementById('autreBesoin').value = '';
+        }
+      });
+    }
+
     contactForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      // Vérification anti-robot
-      if (parseInt(antiRobotInput.value, 10) !== antiRobotAnswer) {
-        formMessage.textContent = 'Réponse anti-robot incorrecte.';
-        formMessage.style.color = '#d32f2f';
-        generateAntiRobot();
+      
+      // Récupération des données du formulaire
+      const formData = new FormData(contactForm);
+      const submitBtn = contactForm.querySelector('.form__submit');
+      const btnText = submitBtn.querySelector('.btn__text');
+      const btnLoading = submitBtn.querySelector('.btn__loading');
+      
+      // Validation des champs obligatoires
+      const nomComplet = formData.get('nomComplet')?.trim();
+      const entreprise = formData.get('entreprise')?.trim();
+      const email = formData.get('email')?.trim();
+      const contexteProjet = formData.get('contexteProjet')?.trim();
+      const maturiteData = formData.get('maturiteData');
+      const diagnosticGratuit = formData.get('diagnosticGratuit');
+      
+      // Validation des besoins principaux
+      const besoinsCoches = formData.getAll('besoinPrincipal');
+      
+      if (!nomComplet || !entreprise || !email || !contexteProjet || !maturiteData || !diagnosticGratuit || besoinsCoches.length === 0) {
+        showToast('Erreur', 'Merci de remplir tous les champs obligatoires marqués d\'un *', 'error');
         return;
       }
-      // Vérification des champs
-      const nom = contactForm.nom.value.trim();
-      const email = contactForm.email.value.trim();
-      const message = contactForm.message.value.trim();
-      if (!nom || !email || !message) {
-        formMessage.textContent = 'Merci de remplir tous les champs.';
-        formMessage.style.color = '#d32f2f';
-        return;
-      }
-      // Email simple regex
+      
+      // Validation email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        formMessage.textContent = 'Adresse email invalide.';
-        formMessage.style.color = '#d32f2f';
+        showToast('Erreur', 'Veuillez saisir une adresse email valide', 'error');
         return;
       }
-      // Simulation d'envoi (à intégrer avec EmailJS, Formspree, etc.)
-      formMessage.textContent = 'Envoi en cours...';
-      formMessage.style.color = '#0057B7';
-      setTimeout(() => {
-        formMessage.textContent = 'Votre message a bien été envoyé !';
-        formMessage.style.color = '#388e3c';
-        contactForm.reset();
-        generateAntiRobot();
-      }, 1200);
+      
+      // Préparation des données pour la base
+      const contactData = {
+        nom_complet: nomComplet,
+        entreprise: entreprise,
+        email: email,
+        whatsapp: formData.get('whatsapp')?.trim() || null,
+        besoin_principal: besoinsCoches,
+        autre_besoin: besoinsCoches.includes('Autre') ? formData.get('autreBesoin')?.trim() : null,
+        contexte_projet: contexteProjet,
+        maturite_data: maturiteData,
+        diagnostic_gratuit: diagnosticGratuit === 'true',
+        disponibilite_contact: formData.get('disponibiliteContact')?.trim() || null
+      };
+      
+      // Animation de chargement
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      
+      // Traitement du formulaire avec base de données et email
+      if (typeof processContactForm === 'function') {
+        processContactForm(contactData)
+          .then(results => {
+            console.log('📊 Résultats du traitement:', results);
+            
+            if (results.errors.length === 0) {
+              // Succès complet
+              showToast('Succès', 'Votre demande a été envoyée avec succès ! Nous vous contacterons dans les plus brefs délais.', 'success');
+            } else if (results.database && !results.email) {
+              // Base OK, email KO
+              showToast('Partiellement envoyé', 'Votre demande a été enregistrée mais l\'email de notification a échoué. Nous vous contacterons quand même.', 'warning');
+            } else if (!results.database && results.email) {
+              // Base KO, email OK
+              showToast('Partiellement envoyé', 'L\'email a été envoyé mais l\'enregistrement en base a échoué. Nous avons reçu votre demande.', 'warning');
+            } else {
+              // Échec complet
+              showToast('Erreur', 'Une erreur est survenue. Veuillez réessayer ou nous contacter directement.', 'error');
+            }
+            
+            // Reset du formulaire en cas de succès partiel ou total
+            if (results.database || results.email) {
+              contactForm.reset();
+              autreBesoinGroup.style.display = 'none';
+            }
+          })
+          .catch(error => {
+            console.error('❌ Erreur traitement formulaire:', error);
+            showToast('Erreur', 'Une erreur technique est survenue. Veuillez réessayer.', 'error');
+          })
+          .finally(() => {
+            // Reset du bouton dans tous les cas
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading');
+          });
+      } else {
+        // Fallback si les fonctions ne sont pas chargées
+        console.warn('⚠️ Fonctions de traitement non disponibles, simulation...');
+        setTimeout(() => {
+          showToast('Mode test', 'Formulaire en mode test - données affichées dans la console.', 'warning');
+          console.log('📝 Données du formulaire:', contactData);
+          
+          contactForm.reset();
+          autreBesoinGroup.style.display = 'none';
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('loading');
+        }, 1000);
+      }
     });
   }
 
@@ -166,6 +244,63 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   window.addEventListener('scroll', toggleCtaAnimation);
   toggleCtaAnimation();
+
+  // Fonction pour afficher les notifications toast
+  function showToast(title, message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastIcon = toast.querySelector('.toast__icon');
+    const toastTitle = toast.querySelector('.toast__message h3');
+    const toastMessage = toast.querySelector('.toast__message p');
+    const toastClose = document.getElementById('toastClose');
+    
+    // Configuration selon le type
+    if (type === 'error') {
+      toast.style.background = 'linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%)';
+      toastIcon.textContent = '⚠';
+    } else if (type === 'warning') {
+      toast.style.background = 'linear-gradient(135deg, #f57c00 0%, #e65100 100%)';
+      toastIcon.textContent = '⚠';
+    } else {
+      toast.style.background = 'linear-gradient(135deg, var(--color-primary) 0%, #003e8a 100%)';
+      toastIcon.textContent = '✓';
+    }
+    
+    // Mise à jour du contenu
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+    
+    // Affichage
+    toast.classList.add('show');
+    
+    // Variable pour stocker le timeout
+    let autoHideTimeout;
+    
+    // Fonction pour masquer le toast
+    function hideToast() {
+      toast.classList.remove('show');
+      if (autoHideTimeout) {
+        clearTimeout(autoHideTimeout);
+      }
+    }
+    
+    // Gestionnaire pour le bouton de fermeture
+    function handleCloseClick() {
+      hideToast();
+      toastClose.removeEventListener('click', handleCloseClick);
+    }
+    
+    // Ajouter l'événement de fermeture
+    toastClose.addEventListener('click', handleCloseClick);
+    
+    // Masquage automatique après 10 secondes
+    autoHideTimeout = setTimeout(() => {
+      hideToast();
+      toastClose.removeEventListener('click', handleCloseClick);
+    }, 10000);
+  }
+
+  // Rendre la fonction accessible globalement
+  window.showToast = showToast;
 });
 
 // Apparition animée (fade-in) pour les éléments révélés

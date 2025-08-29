@@ -179,14 +179,117 @@
   <section class="contact" id="contact">
     <div class="container">
       <h2>Contactez-nous</h2>
-      <div class="contact__googleform-wrapper">
-        <iframe class="contact__googleform"
-          src="https://docs.google.com/forms/d/e/1FAIpQLSfJeyceE_MuNJaqEjz-egCBNRlco9fwHlkHWziLecb4nNxM1A/viewform?embedded=true"
-          width="100%" height="850" frameborder="0" marginheight="0" marginwidth="0"
-          title="Formulaire de contact Teksene">Chargement…</iframe>
-      </div>
+      <form class="contact__form" id="contactForm">
+        <div class="form__row">
+          <div class="form__group">
+            <label for="nomComplet">Votre nom complet *</label>
+            <input type="text" id="nomComplet" name="nomComplet" required>
+          </div>
+          <div class="form__group">
+            <label for="entreprise">Nom de votre entreprise ou structure *</label>
+            <input type="text" id="entreprise" name="entreprise" required>
+          </div>
+        </div>
+        
+        <div class="form__row">
+          <div class="form__group">
+            <label for="email">Email professionnel de contact *</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          <div class="form__group">
+            <label for="whatsapp">Numéro WhatsApp (facultatif)</label>
+            <input type="tel" id="whatsapp" name="whatsapp" placeholder="+33 6 12 34 56 78">
+          </div>
+        </div>
+
+        <div class="form__group">
+          <label>Vos besoins principaux (plusieurs choix possibles) *</label>
+          <div class="form__checkboxes">
+            <label class="checkbox__item">
+              <input type="checkbox" name="besoinPrincipal" value="Audit et collecte de données">
+              <span class="checkbox__text">Audit et collecte de données</span>
+            </label>
+            <label class="checkbox__item">
+              <input type="checkbox" name="besoinPrincipal" value="Structuration et nettoyage de données">
+              <span class="checkbox__text">Structuration et nettoyage de données</span>
+            </label>
+            <label class="checkbox__item">
+              <input type="checkbox" name="besoinPrincipal" value="Création de dashboards">
+              <span class="checkbox__text">Création de dashboards</span>
+            </label>
+            <label class="checkbox__item">
+              <input type="checkbox" name="besoinPrincipal" value="Formation équipe">
+              <span class="checkbox__text">Formation équipe</span>
+            </label>
+            <label class="checkbox__item">
+              <input type="checkbox" name="besoinPrincipal" value="Stratégie data">
+              <span class="checkbox__text">Stratégie data</span>
+            </label>
+            <label class="checkbox__item">
+              <input type="checkbox" name="besoinPrincipal" value="Autre" id="autreCheckbox">
+              <span class="checkbox__text">Autre</span>
+            </label>
+          </div>
+          <div class="form__group" id="autreBesoinGroup" style="display: none; margin-top: 1rem;">
+            <label for="autreBesoin">Précisez votre autre besoin</label>
+            <input type="text" id="autreBesoin" name="autreBesoin" placeholder="Décrivez votre besoin spécifique">
+          </div>
+        </div>
+
+        <div class="form__group">
+          <label for="contexteProjet">Décrivez votre contexte ou projet *</label>
+          <textarea id="contexteProjet" name="contexteProjet" rows="4" required placeholder="Décrivez votre situation actuelle, vos objectifs, et comment nous pouvons vous aider..."></textarea>
+        </div>
+
+        <div class="form__group">
+          <label for="maturiteData">Où en êtes-vous avec vos données ? *</label>
+          <select id="maturiteData" name="maturiteData" required>
+            <option value="">-- Sélectionnez votre niveau --</option>
+            <option value="Je ne collecte pas encore de données">Je ne collecte pas encore de données</option>
+            <option value="Je collecte des données mais sans les structurer">Je collecte des données mais sans les structurer</option>
+            <option value="J'ai déjà des dashboards mais ils sont peu utilisés">J'ai déjà des dashboards mais ils sont peu utilisés</option>
+            <option value="Je suis bien structuré mais je veux aller plus loin">Je suis bien structuré mais je veux aller plus loin</option>
+          </select>
+        </div>
+
+        <div class="form__group">
+          <label>Souhaitez-vous bénéficier de notre diagnostic gratuit ? *</label>
+          <div class="form__radio">
+            <label class="radio__item">
+              <input type="radio" name="diagnosticGratuit" value="true" required>
+              <span class="radio__text">Oui, je suis intéressé(e)</span>
+            </label>
+            <label class="radio__item">
+              <input type="radio" name="diagnosticGratuit" value="false" required>
+              <span class="radio__text">Non, pas pour le moment</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form__group">
+          <label for="disponibiliteContact">Vos disponibilités pour un premier contact (facultatif)</label>
+          <input type="text" id="disponibiliteContact" name="disponibiliteContact" placeholder="Ex: cette semaine, 14h-16h ou prochaine semaine en matinée">
+        </div>
+
+        <button type="submit" class="btn btn--primary form__submit">
+          <span class="btn__text">Envoyer ma demande</span>
+          <span class="btn__loading" style="display: none;">Envoi en cours...</span>
+        </button>
+      </form>
     </div>
   </section>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast">
+    <div class="toast__content">
+      <div class="toast__icon">✓</div>
+      <div class="toast__message">
+        <h3>Merci pour votre demande !</h3>
+        <p>Nous vous contacterons dans les plus brefs délais.</p>
+      </div>
+      <button class="toast__close" id="toastClose" aria-label="Fermer la notification">×</button>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="footer">
@@ -198,6 +301,12 @@
     </div>
   </footer>
 
+  <!-- EmailJS library -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  
+  <!-- Database and email functions -->
+  <script src="js/database.js"></script>
+  
   <script src="js/main.js"></script>
 </body>
 

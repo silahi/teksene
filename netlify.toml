@@ -1,0 +1,34 @@
+[build]
+  # Dossier à publier (racine du site)
+  publish = "."
+  
+  # Commande de build (optionnelle pour un site statique)
+  command = "echo 'Site statique - pas de build nécessaire'"
+
+[functions]
+  # Dossier des Netlify Functions
+  directory = "netlify/functions"
+
+[[headers]]
+  # Appliquer à tous les fichiers
+  for = "/*"
+  [headers.values]
+    # Sécurité de base
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  # CORS pour l'API
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
+# Variables d'environnement par défaut (seront surchargées par les vraies)
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "development"
